@@ -50,20 +50,16 @@ class CM_Attention(nn.Module):
         return x * y.expand_as(x)
 ```
 ![image2](图片2.png)
+
 ### 3.2 AFPN
 
-```python
-class AFPN(nn.Module):
-    def __init__(self, channels):
-        super(AFPN, self).__init__()
-        # Dynamically adjust fusion weights
-        self.weight = nn.Parameter(torch.ones(3, dtype=torch.float32))
+The AFPN structure is defined in the `afpn.yaml` configuration file. Running `afpn.py` will instantiate and execute the model:
 
-    def forward(self, features):
-        w = torch.softmax(self.weight, dim=0)
-        fused = w[0] * features[0] + w[1] * features[1] + w[2] * features[2]
-        return fused
+```bash
+# Load configuration and run AFPN
+python afpn.py --cfg afpn.yaml
 ```
+
 
 ### 3.3 XIoU\_NMS Function
 
