@@ -3,45 +3,33 @@
 ## 1. Introduction
 
 Addressing the challenges of personal protective equipment (PPE) detection in low-light tunnel environments, this paper introduces an improved YOLOv5-based method. The approach integrates a Channel-Metric (CM) attention mechanism, an Adaptive Feature Pyramid Network (AFPN), and an XIoU_NMS function to enhance detection robustness, small target detection, and occluded target detection. Experimental results demonstrate significant improvements, with a detection accuracy of 94.6% and a 15% increase in small target recall. The model's stable performance in real tunnel monitoring systems underscores its potential for enhancing construction safety management.
-![示例图片](图片1.png)
+![image1](图片1.png)
 ---
 
-## 2. 环境配置
+## 2. Requirements
 
-### 2.1 硬件环境
-- GPU: NVIDIA RTX 3090 (24GB) 或同等性能显卡  
-- CPU: Intel i9 以上  
-- 内存: ≥ 32GB  
+### 2.1 Hardware Requirements
+- GPU: NVIDIA RTX 4090 (20GB) or equivalent  
+- CPU: Intel i9 or higher  
+- RAM: ≥ 32GB  
 
-### 2.2 软件环境
-- 系统: Ubuntu 20.04 / Windows 10  
+### 2.2 Software Requirements
+- OS: Ubuntu 20.04 / Windows 10  
 - CUDA: 11.3  
 - cuDNN: 8.2  
 
-### 2.3 Python依赖安装
+### 2.3 Python Dependencies
 ```bash
 conda create -n ppe_yolov5 python=3.8 -y
 conda activate ppe_yolov5
 pip install -r requirements.txt
 ````
 
-`requirements.txt` 示例：
-
-```txt
-torch>=1.10
-torchvision>=0.11
-numpy
-opencv-python
-matplotlib
-pyyaml
-tqdm
-```
-
 ---
 
-## 3. 核心代码说明
+## 3. Training
 
-### 3.1 CM Attention 模块
+### 3.1 CM Attention Module
 
 ```python
 class CM_Attention(nn.Module):
@@ -61,14 +49,14 @@ class CM_Attention(nn.Module):
         y = self.fc(y).view(b, c, 1, 1)
         return x * y.expand_as(x)
 ```
-
-### 3.2 Adaptive FPN 模块
+![image2](图片2.png)
+### 3.2 Training steps
 
 ```python
 class AFPN(nn.Module):
     def __init__(self, channels):
         super(AFPN, self).__init__()
-        # 动态调整融合权重
+        # Dynamically adjust fusion weights
         self.weight = nn.Parameter(torch.ones(3, dtype=torch.float32))
 
     def forward(self, features):
@@ -77,72 +65,55 @@ class AFPN(nn.Module):
         return fused
 ```
 
-### 3.3 XIoU\_NMS 函数
+### 3.3 XIoU\_NMS Function
 
 ```python
 def xiou_nms(boxes, scores, threshold=0.5):
-    # XIoU 替代 IoU 作为抑制标准，提升遮挡检测效果
+    # Replace IoU with XIoU for suppression, enhancing performance under occlusion
     keep = []
-    # 实现逻辑与标准 NMS 类似，但使用 XIoU 计算重叠
+    # Implementation is similar to standard NMS but uses XIoU calculation
     return keep
 ```
 
 ---
 
-## 4. 实验部分
+## 4. Experiments
 
-### 4.1 数据集
+### 4.1 Dataset
 
-* 来源：隧道施工监控视频（红外/低光环境）
-* 标注类别：PPE（安全帽、反光衣、防护眼镜等）
-* 总规模：10,000+ 标注图像
+* Source: Tunnel construction monitoring videos (infrared / low-light conditions)
+* Classes: PPE (helmet, reflective vest, protective glasses, etc.)
+* Scale: 10,000+ annotated images
 
-### 4.2 对比实验结果
+### 4.2 Comparative Results
 
-| 方法                                         | mAP(%)   | 小目标召回率   | FPS |
-| ------------------------------------------ | -------- | -------- | --- |
-| YOLOv5s                                    | 88.1     | 62.3     | 120 |
-| YOLOv5s + SE                               | 89.4     | 66.1     | 112 |
-| YOLOv5s + CBAM                             | 91.2     | 70.4     | 105 |
-| **Ours (YOLOv5s + CM + AFPN + XIoU\_NMS)** | **94.6** | **77.3** | 110 |
+| Model                                       | Precision | Recall | mAP   | F1    |
+|--------------------------------------------|-----------|--------|-------|-------|
+| Faster-RCNN                                 | 0.761     | 0.603  | 0.645 | 0.673 |
+| SSD300                                      | 0.814     | 0.722  | 0.754 | 0.765 |
+| YOLOv3                                      | 0.829     | 0.703  | 0.744 | 0.761 |
+| YOLOv4                                      | 0.740     | 0.623  | 0.663 | 0.676 |
+| YOLOv8                                      | 0.908     | 0.831  | 0.842 | 0.868 |
+| Transformer Mutual Attention  | 0.915     | 0.840  | 0.850 | 0.877 |
+| EAPT                     | 0.920     | 0.845  | 0.855 | 0.880 |
+| **Ours**                                    | 0.946     | 0.883  | 0.902 | 0.913 |
 
-### 4.3 消融实验
-
-| 配置                      | mAP(%)   |
-| ----------------------- | -------- |
-| Baseline YOLOv5s        | 88.1     |
-| + CM                    | 91.5     |
-| + CM + AFPN             | 93.2     |
-| + CM + AFPN + XIoU\_NMS | **94.6** |
+![image3](图片3.png)
 
 ---
 
-## 5. 效果展示
+## 5. Conclusion
 
-### 5.1 PPE 检测可视化结果
+This project introduces improvements including **CM attention mechanism, AFPN multi-scale fusion, and XIoU\_NMS suppression**, which significantly enhance detection accuracy and robustness for PPE detection in low-light tunnel environments.
 
-![隧道 PPE 检测结果](./results/ppe_detection.png)
+Future work will focus on:
 
-### 5.2 光照对比实验
-
-![低光 vs 正常光照](./results/illumination_compare.png)
-
-### 5.3 遮挡情况下检测
-
-![遮挡 PPE 检测](./results/occlusion_detection.png)
+* Multi-modal fusion (infrared + visible light)
+* Temporal information integration for video detection
+* Broader application in diverse construction safety scenarios
 
 ---
 
-## 6. 总结
 
-本项目通过 **CM 注意力机制、AFPN 多尺度融合、XIoU\_NMS 改进抑制**，显著提升了隧道低光环境下 PPE 检测的精度与鲁棒性。
-
-未来工作方向：
-
-* 多模态数据融合（红外 + 可见光）
-* 视频时序信息增强
-* 在更多施工场景中推广应用
-
----
 
 
