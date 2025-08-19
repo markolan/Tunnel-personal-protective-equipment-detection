@@ -50,7 +50,7 @@ class CM_Attention(nn.Module):
         return x * y.expand_as(x)
 ```
 ![image2](图片2.png)
-### 3.2 Training steps
+### 3.2 AFPN
 
 ```python
 class AFPN(nn.Module):
