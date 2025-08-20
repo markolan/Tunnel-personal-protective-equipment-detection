@@ -27,7 +27,7 @@ pip install -r requirements.txt
 
 ---
 
-## 3. Training
+## 3. Core components
 
 ### 3.1 CM Attention Module
 
@@ -133,7 +133,7 @@ i = NMS(boxes, scores, iou_thres, class_nms='XIoU')
 ### 4.1 Dataset
 
 The dataset comprises 9,450 images across five categories: helmet, no_helmet, reflective_vests, no_reflective_vests, person. Safety helmets and reflective vests are essential protective equipment for workers, while the "people" category can be combined with the detection results of safety helmets and reflective vests to determine whether workers are wearing the necessary personal protective equipment.
-![image5](图片5.png)
+![image4](图片4.png)
 
 ### 4.2 Comparative Results
 
@@ -152,15 +152,10 @@ The dataset comprises 9,450 images across five categories: helmet, no_helmet, re
 
 ---
 
-## 5. Conclusion
+## 5. Statement
 
-This project introduces improvements including **CM attention mechanism, AFPN multi-scale fusion, and XIoU\_NMS suppression**, which significantly enhance detection accuracy and robustness for PPE detection in low-light tunnel environments.
-
-Future work will focus on:
-
-* Multi-modal fusion (infrared + visible light)
-* Temporal information integration for video detection
-* Broader application in diverse construction safety scenarios
+This repository is directly associated with our paper submitted to *The Visual Computer* journal.  
+We kindly ask readers to cite our paper when using this code in academic research or applications.  
 
 ---
 
