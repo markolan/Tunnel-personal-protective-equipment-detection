@@ -63,12 +63,67 @@ python afpn.py --cfg afpn.yaml
 
 ### 3.3 XIoU\_NMS Function
 
+Add the `bbox_iou_xiou` function to the `metrics. py` file
 ```python
-def xiou_nms(boxes, scores, threshold=0.5):
-    # Replace IoU with XIoU for suppression, enhancing performance under occlusion
-    keep = []
-    # Implementation is similar to standard NMS but uses XIoU calculation
-    return keep
+def bbox_iou_xiou(box1, box2, x1y1x2y2=True, GIoU=False, DIoU=False, CIoU=False, XIoU=False, eps=1e-7):
+    # Returns the IoU of box1 to box2. box1 is 4, box2 is nx4
+    box2 = box2.T
+
+    # Get the coordinates of bounding boxes
+    if x1y1x2y2:  # x1, y1, x2, y2 = box1
+        b1_x1, b1_y1, b1_x2, b1_y2 = box1[0], box1[1], box1[2], box1[3]
+        b2_x1, b2_y1, b2_x2, b2_y2 = box2[0], box2[1], box2[2], box2[3]
+    else:  # transform from xywh to xyxy
+        b1_x1, b1_x2 = box1[0] - box1[2] / 2, box1[0] + box1[2] / 2
+        b1_y1, b1_y2 = box1[1] - box1[3] / 2, box1[1] + box1[3] / 2
+        b2_x1, b2_x2 = box2[0] - box2[2] / 2, box2[0] + box2[2] / 2
+        b2_y1, b2_y2 = box2[1] - box2[3] / 2, box2[1] + box2[3] / 2
+
+    # Intersection area
+    inter = (torch.min(b1_x2, b2_x2) - torch.max(b1_x1, b2_x1)).clamp(0) * \
+            (torch.min(b1_y2, b2_y2) - torch.max(b1_y1, b2_y1)).clamp(0)
+
+    # Union Area
+    w1, h1 = b1_x2 - b1_x1, b1_y2 - b1_y1 + eps
+    w2, h2 = b2_x2 - b2_x1, b2_y2 - b2_y1 + eps
+    union = w1 * h1 + w2 * h2 - inter + eps
+
+    iou = inter / union
+    if CIoU or DIoU or GIoU or XIoU:
+        cw = torch.max(b1_x2, b2_x2) - torch.min(b1_x1, b2_x1)  # convex (smallest enclosing box) width
+        ch = torch.max(b1_y2, b2_y2) - torch.min(b1_y1, b2_y1)  # convex height
+        if CIoU or DIoU:  # Distance or Complete IoU https://arxiv.org/abs/1911.08287v1
+            c2 = cw ** 2 + ch ** 2 + eps  # convex diagonal squared
+            rho2 = ((b2_x1 + b2_x2 - b1_x1 - b1_x2) ** 2 +
+                    (b2_y1 + b2_y2 - b1_y1 - b1_y2) ** 2) / 4  # center distance squared
+            if CIoU:  
+                v = (4 / math.pi ** 2) * torch.pow(torch.atan(w2 / h2) - torch.atan(w1 / h1), 2)
+                with torch.no_grad():
+                    alpha = v / (v - iou + (1 + eps))
+                return iou - (rho2 / c2 + v * alpha)  # CIoU
+            return iou - rho2 / c2  # DIoU
+            # 这部分是新增的
+        elif XIoU:
+            c2 = cw ** 2 + ch ** 2 + eps  # convex diagonal squared
+            rho2 = ((b2_x1 + b2_x2 - b1_x1 - b1_x2) ** 2 + (b2_y1 + b2_y2 - b1_y1 - b1_y2) ** 2) / 4  # center dist ** 2
+            beta = 1
+            q2 = (1 + torch.exp(-(w2 / h2)))
+            q1 = (1 + torch.exp(-(w1 / h1)))
+            v = torch.pow(1 / q2 - 1 / q1, 2)
+            with torch.no_grad():
+                alpha = v / (v - iou + (1 + eps)) * beta
+            return iou - (rho2 / c2 + v * alpha)   
+        c_area = cw * ch + eps  # convex area
+        return iou - (c_area - union) / c_area  # GIoU https://arxiv.org/pdf/1902.09630.pdf
+    return iou  # IoU
+```
+Modification:
+```python
+iou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, CIoU=True)
+i = torchvision.ops.nms(boxes, scores, iou_thres)
+#Change to:
+iou = bbox_iou_xiou(pbox.T, tbox[i], x1y1x2y2=False, XIoU=True)
+i = NMS(boxes, scores, iou_thres, class_nms='XIoU') 
 ```
 
 ---
@@ -77,9 +132,8 @@ def xiou_nms(boxes, scores, threshold=0.5):
 
 ### 4.1 Dataset
 
-* Source: Tunnel construction monitoring videos (infrared / low-light conditions)
-* Classes: PPE (helmet, reflective vest, protective glasses, etc.)
-* Scale: 10,000+ annotated images
+The dataset comprises 9,450 images across five categories: helmet, no_helmet, reflective_vests, no_reflective_vests, person. Safety helmets and reflective vests are essential protective equipment for workers, while the "people" category can be combined with the detection results of safety helmets and reflective vests to determine whether workers are wearing the necessary personal protective equipment.
+![image5](图片5.png)
 
 ### 4.2 Comparative Results
 
@@ -90,8 +144,8 @@ def xiou_nms(boxes, scores, threshold=0.5):
 | YOLOv3                                      | 0.829     | 0.703  | 0.744 | 0.761 |
 | YOLOv4                                      | 0.740     | 0.623  | 0.663 | 0.676 |
 | YOLOv8                                      | 0.908     | 0.831  | 0.842 | 0.868 |
-| Transformer Mutual Attention  | 0.915     | 0.840  | 0.850 | 0.877 |
-| EAPT                     | 0.920     | 0.845  | 0.855 | 0.880 |
+| Transformer Mutual Attention                | 0.915     | 0.840  | 0.850 | 0.877 |
+| EAPT                                        | 0.920     | 0.845  | 0.855 | 0.880 |
 | **Ours**                                    | 0.946     | 0.883  | 0.902 | 0.913 |
 
 ![image3](图片3.png)
