@@ -4,7 +4,6 @@
 
 Addressing the challenges of personal protective equipment (PPE) detection in low-light tunnel environments, this paper introduces an improved YOLOv5-based method. The approach integrates a Channel-Metric (CM) attention mechanism, an Adaptive Feature Pyramid Network (AFPN), and an XIoU_NMS function to enhance detection robustness, small target detection, and occluded target detection. Experimental results demonstrate significant improvements, with a detection accuracy of 94.6% and a 15% increase in small target recall. The model's stable performance in real tunnel monitoring systems underscores its potential for enhancing construction safety management.
 ![image1](图片1.png)
----
 
 ## 2. Requirements
 
@@ -150,10 +149,12 @@ python train.py --weights '' --cfg models/yolov5x-cm.yaml --data data/V005.yaml 
 ---
 ## 5. Application Deployment
 ### 5.1 deployment architecture
+Our project has built an intelligent industrial safety monitoring system that collects real-time data from construction sites through cameras, and uses edge devices for localized algorithm detection and analysis. When security risks are discovered, the warning system is immediately triggered, and the collected data is stored locally for model training and algorithm optimization. This forms a complete closed-loop system from data collection, edge processing, real-time warning to model iteration, effectively solving the problems of high latency, privacy risks, and poor adaptability in traditional cloud monitoring solutions. It provides a low latency, high privacy protection, and sustainable optimization intelligent safety monitoring solution for industrial scenes.
 ![image5.1](5.1.png)
 
 ### 5.2 Edge device Requirements
 Here is the hardware specification for the SY-E176 edge device in English Markdown format. You can use this directly in your GitHub documentation.
+
 ![image5.2](5.2.png)
 
 **Edge Device Hardware Specifications (SY-E176)**
@@ -173,7 +174,7 @@ Here is the hardware specification for the SY-E176 edge device in English Markdo
 | **Cooling** | Fanless heat conduction design (Passive cooling) |
 | **Expansion** | Optional mSATA card interface, Wi-Fi, and 5G modules |
 
-## 5. Statement
+## 6. Statement
 
 This repository is directly associated with our paper submitted to *The Visual Computer* journal.  
 We kindly ask readers to cite our paper when using this code in academic research or applications.  
