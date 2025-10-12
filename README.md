@@ -135,22 +135,43 @@ i = NMS(boxes, scores, iou_thres, class_nms='XIoU')
 The dataset comprises 9,450 images across five categories: helmet, no_helmet, reflective_vests, no_reflective_vests, person. Safety helmets and reflective vests are essential protective equipment for workers, while the "people" category can be combined with the detection results of safety helmets and reflective vests to determine whether workers are wearing the necessary personal protective equipment.
 ![image4](图片4.png)
 
-### 4.2 Comparative Results
+Dataset Access: Due to its size and usage agreements, this dataset is not directly included in the repository. For research purposes, please contact us to request access to the dataset. Email:wumenglan_1998@126.com
 
-| Model                                       | Precision | Recall | mAP   | F1    |
-|--------------------------------------------|-----------|--------|-------|-------|
-| Faster-RCNN                                 | 0.761     | 0.603  | 0.645 | 0.673 |
-| SSD300                                      | 0.814     | 0.722  | 0.754 | 0.765 |
-| YOLOv3                                      | 0.829     | 0.703  | 0.744 | 0.761 |
-| YOLOv4                                      | 0.740     | 0.623  | 0.663 | 0.676 |
-| YOLOv8                                      | 0.908     | 0.831  | 0.842 | 0.868 |
-| Transformer Mutual Attention                | 0.915     | 0.840  | 0.850 | 0.877 |
-| EAPT                                        | 0.920     | 0.845  | 0.855 | 0.880 |
-| **Ours**                                    | 0.946     | 0.883  | 0.902 | 0.913 |
+### 4.2 training
+Run the following command：
+```python
+python train.py --weights '' --cfg models/yolov5x-cm.yaml --data data/V005.yaml --hyp data/hyps/hyp.scratch.yaml --epochs 50 --batch-size 4 --imgsz 1280
+```
+
+### 4.2 Results
 
 ![image3](图片3.png)
 
 ---
+## 5. Application Deployment
+### 5.1 deployment architecture
+![image5.1](图片5.1.png)
+
+### 5.2 Edge device Requirements
+Here is the hardware specification for the SY-E176 edge device in English Markdown format. You can use this directly in your GitHub documentation.
+![image5.2](图片5.2.png)
+---
+### **Edge Device Hardware Specifications (SY-E176)**
+| Specification | Details |
+| :--- | :--- |
+| **Model** | SY-E176 |
+| **Processor (SoC)** | 8 * ARM Cortex-A53 |
+| **AI Performance** | 17.6 TOPS @ INT8 |
+| **Memory** | LPDDR4 12 Gbyte |
+| **Storage** | eMMC 32 Gbyte |
+| **Network Interfaces** | 10/100/1000Mbps Adaptive Ethernet Port * 2 |
+| **Video Decoding** | 32-channel 1080P @ 30fps (H.264, H.265)<br>16-channel 1080P @ 30fps (H.264, H.265) |
+| **Video Encoding** | 480fps @ FHD (JPEG) |
+| **Power Supply** | DC 12V/2A |
+| **Operating Temperature** | -40°C ~ 70°C |
+| **Power Consumption** | 14W |
+| **Cooling** | Fanless heat conduction design (Passive cooling) |
+| **Expansion** | Optional mSATA card interface, Wi-Fi, and 5G modules |
 
 ## 5. Statement
 
