@@ -150,11 +150,11 @@ python train.py --weights '' --cfg models/yolov5x-cm.yaml --data data/V005.yaml 
 ---
 ## 5. Application Deployment
 ### 5.1 deployment architecture
-![image5.1](图片5.1.png)
+![image5.1](5.1.png)
 
 ### 5.2 Edge device Requirements
 Here is the hardware specification for the SY-E176 edge device in English Markdown format. You can use this directly in your GitHub documentation.
-![image5.2](图片5.2.png)
+![image5.2](5.2.png)
 ---
 ### **Edge Device Hardware Specifications (SY-E176)**
 | Specification | Details |
